@@ -5,6 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from .forms import ImageUploadForm
 from django.conf import settings
 from .opencv_dface import opencv_dface
+from .models import ImageUploadModel
 
 # Create your views here.
 
@@ -30,6 +31,12 @@ def dface(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.save()
+
+            # db delete
+            if ImageUploadModel.objects.all().count() > 100:
+                obs = ImageUploadModel.objects.all().first()
+                if obs:
+                    obs.delete()
 
             imageURL = settings.MEDIA_URL + form.instance.document.name
             opencv_dface(settings.MEDIA_ROOT_URL + imageURL)
